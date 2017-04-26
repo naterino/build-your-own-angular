@@ -63,10 +63,16 @@ Scope.prototype.$watchGroup = function(watchFns, listenerFn) {
 	var firstRun = true;
 
 	if(watchFns.length === 0) {
+		var shouldCall = true;
+		
 		self.$evalAsync(function() { 
-			listenerFn(newValues, oldValues, self);
+			if (shouldCall) {
+				listenerFn(newValues, oldValues, self);
+			}
 		}); 
-		return;
+		return function() {
+			shouldCall = false;
+		};
 	}
 
 	function watchGroupListener() {
@@ -214,6 +220,13 @@ Scope.prototype.$evalAsync = function(expr) {
 
 Scope.prototype.$$postDigest = function(fn) {
 	this.$$postDigestQueue.push(fn);
+};
+
+Scope.prototype.$new = function() {
+	var ChildScope = function() { };
+	ChildScope.prototype = this;
+	var child = new ChildScope();
+	return child;
 };
 
 
